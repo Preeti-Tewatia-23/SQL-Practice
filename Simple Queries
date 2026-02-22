@@ -1,0 +1,101 @@
+# Create Database
+CREATE Database ecommerce_db;
+USE ecommerce_db;
+
+# Create Tables
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) UNIQUE,
+    email VARCHAR(100) UNIQUE,
+    phone VARCHAR(50),
+    city VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+# Products Table
+CREATE TABLE products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(100) NOT NULL,
+    category VARCHAR(50),
+    price DECIMAL(10,2) NOT NULL,
+    stock INT DEFAULT 0
+);
+
+# Orders Table
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    order_date DATE,
+    total_amount DECIMAL(10,2),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+# Order Details Table
+CREATE TABLE order_details (
+    order_detail_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    price DECIMAL(10,2),
+    FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+## Insert Data
+INSERT INTO customers (first_name, last_name, email, phone, city)
+VALUES 
+('John', 'Doe', 'john@example.com', '1234567890', 'New York'),
+('Jane', 'Smith', 'jane@example.com', '9876543210', 'Chicago');
+
+INSERT INTO products (product_name, category, price, stock)
+VALUES
+('Laptop', 'Electronics', 800.00, 10),
+('Phone', 'Electronics', 500.00, 20),
+('Headphones', 'Accessories', 100.00, 30);
+
+# Basic Select Queries
+SELECT * FROM customers;
+
+SELECT product_name, price 
+FROM products
+WHERE price > 200;
+
+SELECT * FROM customers
+ORDER BY created_at DESC;
+
+# Join Queries
+SELECT o.order_id, c.first_name, o.order_date, o.total_amount
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id;
+
+# Aggregate Functions
+SELECT COUNT(*) AS total_customers FROM customers;
+
+SELECT SUM(total_amount) AS total_sales FROM orders;
+
+SELECT category, AVG(price) AS avg_price
+FROM products
+GROUP BY category;
+
+# Subqueries
+SELECT * FROM products
+WHERE price > (SELECT AVG(price) FROM products);
+
+# Update & Delete
+UPDATE products
+SET stock = stock - 1
+WHERE product_id = 1;
+
+DELETE FROM customers
+WHERE customer_id = 2;
+
+# Views
+CREATE VIEW order_summary AS
+SELECT o.order_id, c.first_name, o.total_amount
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id;
+
+# Index
+CREATE INDEX idx_customer_email
+ON customers(email);
